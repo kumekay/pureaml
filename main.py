@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import sys
@@ -36,7 +35,18 @@ from ruamel.yaml.comments import CommentedMap, CommentedSeq, C_PRE
 from ruamel.yaml.docinfo import DocInfo, version, Version
 
 if False:  # MYPY
-    from typing import List, Set, Dict, Tuple, Union, Any, Callable, Optional, Text, Type  # NOQA
+    from typing import (
+        List,
+        Set,
+        Dict,
+        Tuple,
+        Union,
+        Any,
+        Callable,
+        Optional,
+        Text,
+        Type,
+    )  # NOQA
     from ruamel.yaml.compat import StreamType, StreamTextType, VersionType  # NOQA
     from types import TracebackType
     from pathlib import Path
@@ -58,7 +68,7 @@ class YAML:
         self: Any,
         *,
         typ: Optional[Union[List[Text], Text]] = None,
-        pure: Any = False,
+        pure: Any = True,
         output: Any = None,
         plug_ins: Any = None,
     ) -> None:  # input=None,
@@ -74,7 +84,7 @@ class YAML:
         plug_ins: a list of plug-in files
         """
 
-        self.typ = ['rt'] if typ is None else (typ if isinstance(typ, list) else [typ])
+        self.typ = ["rt"] if typ is None else (typ if isinstance(typ, list) else [typ])
         self.pure = pure
 
         # self._input = input
@@ -83,7 +93,7 @@ class YAML:
 
         self.plug_ins: List[Any] = []
         for pu in ([] if plug_ins is None else plug_ins) + self.official_plug_ins():
-            file_name = pu.replace(os.sep, '.')
+            file_name = pu.replace(os.sep, ".")
             self.plug_ins.append(import_module(file_name))
         self.Resolver: Any = ruamel.yaml.resolver.VersionedResolver
         self.allow_unicode = True
@@ -96,23 +106,27 @@ class YAML:
         self.comment_handling = None
         typ_found = 1
         setup_rt = False
-        if 'rt' in self.typ:
+        if "rt" in self.typ:
             setup_rt = True
-        elif 'safe' in self.typ:
+        elif "safe" in self.typ:
             self.Emitter = (
                 ruamel.yaml.emitter.Emitter if pure or CEmitter is None else CEmitter
             )
             self.Representer = ruamel.yaml.representer.SafeRepresenter
-            self.Parser = ruamel.yaml.parser.Parser if pure or CParser is None else CParser
+            self.Parser = (
+                ruamel.yaml.parser.Parser if pure or CParser is None else CParser
+            )
             self.Composer = ruamel.yaml.composer.Composer
             self.Constructor = ruamel.yaml.constructor.SafeConstructor
-        elif 'base' in self.typ:
+        elif "base" in self.typ:
             self.Emitter = ruamel.yaml.emitter.Emitter
             self.Representer = ruamel.yaml.representer.BaseRepresenter
-            self.Parser = ruamel.yaml.parser.Parser if pure or CParser is None else CParser
+            self.Parser = (
+                ruamel.yaml.parser.Parser if pure or CParser is None else CParser
+            )
             self.Composer = ruamel.yaml.composer.Composer
             self.Constructor = ruamel.yaml.constructor.BaseConstructor
-        elif 'unsafe' in self.typ:
+        elif "unsafe" in self.typ:
             warnings.warn(
                 "\nyou should no longer specify 'unsafe'.\nFor **dumping only** use yaml=YAML(typ='full')\n",  # NOQA
                 PendingDeprecationWarning,
@@ -122,18 +136,22 @@ class YAML:
                 ruamel.yaml.emitter.Emitter if pure or CEmitter is None else CEmitter
             )
             self.Representer = ruamel.yaml.representer.Representer
-            self.Parser = ruamel.yaml.parser.Parser if pure or CParser is None else CParser
+            self.Parser = (
+                ruamel.yaml.parser.Parser if pure or CParser is None else CParser
+            )
             self.Composer = ruamel.yaml.composer.Composer
             self.Constructor = ruamel.yaml.constructor.Constructor
-        elif 'full' in self.typ:
+        elif "full" in self.typ:
             self.Emitter = (
                 ruamel.yaml.emitter.Emitter if pure or CEmitter is None else CEmitter
             )
             self.Representer = ruamel.yaml.representer.Representer
-            self.Parser = ruamel.yaml.parser.Parser if pure or CParser is None else CParser
+            self.Parser = (
+                ruamel.yaml.parser.Parser if pure or CParser is None else CParser
+            )
             # self.Composer = ruamel.yaml.composer.Composer
             # self.Constructor = ruamel.yaml.constructor.Constructor
-        elif 'rtsc' in self.typ:
+        elif "rtsc" in self.typ:
             self.default_flow_style = False
             # no optimized rt-dumper yet
             self.Emitter = ruamel.yaml.emitter.RoundTripEmitter
@@ -178,7 +196,7 @@ class YAML:
         self._version: Optional[Any] = None
         self.preserve_quotes: Optional[bool] = None
         self.allow_duplicate_keys = False  # duplicate keys in map, set
-        self.encoding = 'utf-8'
+        self.encoding = "utf-8"
         self.explicit_start: Union[bool, None] = None
         self.explicit_end: Union[bool, None] = None
         self._tags = None
@@ -190,7 +208,7 @@ class YAML:
         # [a, b: 1, c: {d: 2}]  vs. [a, {b: 1}, {c: {d: 2}}]
         self.brace_single_entry_mapping_in_flow_sequence = False
         for module in self.plug_ins:
-            if getattr(module, 'typ', None) in self.typ:
+            if getattr(module, "typ", None) in self.typ:
                 typ_found += 1
                 module.init_typ(self)
                 break
@@ -217,12 +235,12 @@ class YAML:
 
     @property
     def parser(self) -> Any:
-        attr = '_' + sys._getframe().f_code.co_name
+        attr = "_" + sys._getframe().f_code.co_name
         if not hasattr(self, attr):
             if self.Parser is not CParser:
                 setattr(self, attr, self.Parser(loader=self))
             else:
-                if getattr(self, '_stream', None) is None:
+                if getattr(self, "_stream", None) is None:
                     # wait for the stream
                     return None
                 else:
@@ -238,17 +256,17 @@ class YAML:
 
     @property
     def composer(self) -> Any:
-        attr = '_' + sys._getframe().f_code.co_name
+        attr = "_" + sys._getframe().f_code.co_name
         if not hasattr(self, attr):
             setattr(self, attr, self.Composer(loader=self))
         return getattr(self, attr)
 
     @property
     def constructor(self) -> Any:
-        attr = '_' + sys._getframe().f_code.co_name
+        attr = "_" + sys._getframe().f_code.co_name
         if not hasattr(self, attr):
             if self.Constructor is None:
-                if 'full' in self.typ:
+                if "full" in self.typ:
                     raise YAMLError(
                         "\nyou can only use yaml=YAML(typ='full') for dumping\n",  # NOQA
                     )
@@ -269,7 +287,7 @@ class YAML:
 
     @property
     def emitter(self) -> Any:
-        attr = '_' + sys._getframe().f_code.co_name
+        attr = "_" + sys._getframe().f_code.co_name
         if not hasattr(self, attr):
             if self.Emitter is not CEmitter:
                 _emitter = self.Emitter(
@@ -296,7 +314,7 @@ class YAML:
                 if self.compact_seq_map is not None:
                     _emitter.compact_seq_map = self.compact_seq_map
             else:
-                if getattr(self, '_stream', None) is None:
+                if getattr(self, "_stream", None) is None:
                     # wait for the stream
                     return None
                 return None
@@ -304,7 +322,7 @@ class YAML:
 
     @property
     def serializer(self) -> Any:
-        attr = '_' + sys._getframe().f_code.co_name
+        attr = "_" + sys._getframe().f_code.co_name
         if not hasattr(self, attr):
             setattr(
                 self,
@@ -322,7 +340,7 @@ class YAML:
 
     @property
     def representer(self) -> Any:
-        attr = '_' + sys._getframe().f_code.co_name
+        attr = "_" + sys._getframe().f_code.co_name
         if not hasattr(self, attr):
             repres = self.Representer(
                 default_style=self.default_style,
@@ -330,7 +348,9 @@ class YAML:
                 dumper=self,
             )
             if self.sort_base_mapping_type_on_output is not None:
-                repres.sort_base_mapping_type_on_output = self.sort_base_mapping_type_on_output
+                repres.sort_base_mapping_type_on_output = (
+                    self.sort_base_mapping_type_on_output
+                )
             setattr(self, attr, repres)
         return getattr(self, attr)
 
@@ -338,9 +358,9 @@ class YAML:
         """
         Scan a YAML stream and produce scanning tokens.
         """
-        if not hasattr(stream, 'read') and hasattr(stream, 'open'):
+        if not hasattr(stream, "read") and hasattr(stream, "open"):
             # pathlib.Path() instance
-            with stream.open('rb') as fp:
+            with stream.open("rb") as fp:
                 return self.scan(fp)
         self.doc_infos.append(DocInfo(requested_version=version(self.version)))
         self.tags = {}
@@ -350,9 +370,9 @@ class YAML:
                 yield self.scanner.get_token()
         finally:
             parser.dispose()
-            for comp in ('reader', 'scanner'):
+            for comp in ("reader", "scanner"):
                 try:
-                    getattr(getattr(self, '_' + comp), f'reset_{comp}')()
+                    getattr(getattr(self, "_" + comp), f"reset_{comp}")()
                 except AttributeError:
                     pass
 
@@ -360,9 +380,9 @@ class YAML:
         """
         Parse a YAML stream and produce parsing events.
         """
-        if not hasattr(stream, 'read') and hasattr(stream, 'open'):
+        if not hasattr(stream, "read") and hasattr(stream, "open"):
             # pathlib.Path() instance
-            with stream.open('rb') as fp:
+            with stream.open("rb") as fp:
                 return self.parse(fp)
         self.doc_infos.append(DocInfo(requested_version=version(self.version)))
         self.tags = {}
@@ -372,9 +392,9 @@ class YAML:
                 yield parser.get_event()
         finally:
             parser.dispose()
-            for comp in ('reader', 'scanner'):
+            for comp in ("reader", "scanner"):
                 try:
-                    getattr(getattr(self, '_' + comp), f'reset_{comp}')()
+                    getattr(getattr(self, "_" + comp), f"reset_{comp}")()
                 except AttributeError:
                     pass
 
@@ -383,9 +403,9 @@ class YAML:
         Parse the first YAML document in a stream
         and produce the corresponding representation tree.
         """
-        if not hasattr(stream, 'read') and hasattr(stream, 'open'):
+        if not hasattr(stream, "read") and hasattr(stream, "open"):
             # pathlib.Path() instance
-            with stream.open('rb') as fp:
+            with stream.open("rb") as fp:
                 return self.compose(fp)
         self.doc_infos.append(DocInfo(requested_version=version(self.version)))
         self.tags = {}
@@ -394,9 +414,9 @@ class YAML:
             return constructor.composer.get_single_node()
         finally:
             parser.dispose()
-            for comp in ('reader', 'scanner'):
+            for comp in ("reader", "scanner"):
                 try:
-                    getattr(getattr(self, '_' + comp), f'reset_{comp}')()
+                    getattr(getattr(self, "_" + comp), f"reset_{comp}")()
                 except AttributeError:
                     pass
 
@@ -413,9 +433,9 @@ class YAML:
                 yield constructor.composer.get_node()
         finally:
             parser.dispose()
-            for comp in ('reader', 'scanner'):
+            for comp in ("reader", "scanner"):
                 try:
-                    getattr(getattr(self, '_' + comp), f'reset_{comp}')()
+                    getattr(getattr(self, "_" + comp), f"reset_{comp}")()
                 except AttributeError:
                     pass
 
@@ -440,9 +460,9 @@ class YAML:
         If either the Scanner or Reader are set, you cannot use the non-pure Parser,
             so reset it to the pure parser and set the Reader resp. Scanner if necessary
         """
-        if not hasattr(stream, 'read') and hasattr(stream, 'open'):
+        if not hasattr(stream, "read") and hasattr(stream, "open"):
             # pathlib.Path() instance
-            with stream.open('rb') as fp:
+            with stream.open("rb") as fp:
                 return self.load(fp)
         self.doc_infos.append(DocInfo(requested_version=version(self.version)))
         self.tags = {}
@@ -451,16 +471,16 @@ class YAML:
             return constructor.get_single_data()
         finally:
             parser.dispose()
-            for comp in ('reader', 'scanner'):
+            for comp in ("reader", "scanner"):
                 try:
-                    getattr(getattr(self, '_' + comp), f'reset_{comp}')()
+                    getattr(getattr(self, "_" + comp), f"reset_{comp}")()
                 except AttributeError:
                     pass
 
     def load_all(self, stream: Union[Path, StreamTextType]) -> Any:  # *, skip=None):
-        if not hasattr(stream, 'read') and hasattr(stream, 'open'):
+        if not hasattr(stream, "read") and hasattr(stream, "open"):
             # pathlib.Path() instance
-            with stream.open('r') as fp:
+            with stream.open("r") as fp:
                 for d in self.load_all(fp):
                     yield d
                 return
@@ -477,9 +497,9 @@ class YAML:
                 self.doc_infos.append(DocInfo(requested_version=version(self.version)))
         finally:
             parser.dispose()
-            for comp in ('reader', 'scanner'):
+            for comp in ("reader", "scanner"):
                 try:
-                    getattr(getattr(self, '_' + comp), f'reset_{comp}')()
+                    getattr(getattr(self, "_" + comp), f"reset_{comp}")()
                 except AttributeError:
                     pass
 
@@ -488,9 +508,9 @@ class YAML:
         the old cyaml needs special setup, and therefore the stream
         """
         if self.Constructor is None:
-            if 'full' in self.typ:
+            if "full" in self.typ:
                 raise YAMLError(
-                     "\nyou can only use yaml=YAML(typ='full') for dumping\n",  # NOQA
+                    "\nyou can only use yaml=YAML(typ='full') for dumping\n",  # NOQA
                 )
         if self.Parser is not CParser:
             if self.Reader is None:
@@ -577,24 +597,36 @@ class YAML:
                 raise
 
     def dump(
-        self: Any, data: Union[Path, StreamType], stream: Any = None, *, transform: Any = None,
+        self: Any,
+        data: Union[Path, StreamType],
+        stream: Any = None,
+        *,
+        transform: Any = None,
     ) -> Any:
         if self._context_manager:
             if not self._output:
-                raise TypeError('Missing output stream while dumping from context manager')
+                raise TypeError(
+                    "Missing output stream while dumping from context manager"
+                )
             if transform is not None:
                 x = self.__class__.__name__
                 raise TypeError(
-                    f'{x}.dump() in the context manager cannot have transform keyword',
+                    f"{x}.dump() in the context manager cannot have transform keyword",
                 )
             self._context_manager.dump(data)
         else:  # old style
             if stream is None:
-                raise TypeError('Need a stream argument when not dumping from context manager')
+                raise TypeError(
+                    "Need a stream argument when not dumping from context manager"
+                )
             return self.dump_all([data], stream, transform=transform)
 
     def dump_all(
-        self, documents: Any, stream: Union[Path, StreamType], *, transform: Any = None,
+        self,
+        documents: Any,
+        stream: Union[Path, StreamType],
+        *,
+        transform: Any = None,
     ) -> Any:
         if self._context_manager:
             raise NotImplementedError
@@ -610,9 +642,9 @@ class YAML:
         """
         Serialize a sequence of Python objects into a YAML stream.
         """
-        if not hasattr(stream, 'write') and hasattr(stream, 'open'):
+        if not hasattr(stream, "write") and hasattr(stream, "open"):
             # pathlib.Path() instance
-            with stream.open('w') as fp:
+            with stream.open("w") as fp:
                 return self.dump_all(documents, fp, transform=transform)
         # The stream should have the methods `write` and possibly `flush`.
         if self.top_level_colon_align is True:
@@ -626,7 +658,8 @@ class YAML:
             else:
                 stream = BytesIO()
         serializer, representer, emitter = self.get_serializer_representer_emitter(
-            stream, tlca,
+            stream,
+            tlca,
         )
         try:
             self.serializer.open()
@@ -643,8 +676,8 @@ class YAML:
             except AttributeError:
                 raise
                 # self.dumper.dispose()  # cyaml
-            delattr(self, '_serializer')
-            delattr(self, '_emitter')
+            delattr(self, "_serializer")
+            delattr(self, "_emitter")
         if transform:
             val = stream.getvalue()
             if self.encoding:
@@ -677,7 +710,7 @@ class YAML:
 
         rslvr = (
             ruamel.yaml.resolver.BaseResolver
-            if 'base' in self.typ
+            if "base" in self.typ
             else ruamel.yaml.resolver.Resolver
         )
 
@@ -718,7 +751,9 @@ class YAML:
                 )
                 selfx._emitter = selfx._serializer = selfx._representer = selfx
                 self.Representer.__init__(
-                    selfx, default_style=default_style, default_flow_style=default_flow_style,
+                    selfx,
+                    default_style=default_style,
+                    default_flow_style=default_flow_style,
                 )
                 rslvr.__init__(selfx)
 
@@ -743,13 +778,13 @@ class YAML:
 
     # basic types
     def map(self, **kw: Any) -> Any:
-        if 'rt' in self.typ:
+        if "rt" in self.typ:
             return CommentedMap(**kw)
         else:
             return dict(**kw)
 
     def seq(self, *args: Any) -> Any:
-        if 'rt' in self.typ:
+        if "rt" in self.typ:
             return CommentedSeq(*args)
         else:
             return list(*args)
@@ -767,7 +802,7 @@ class YAML:
         except NameError:
             return []
         gpbd = os.path.dirname(os.path.dirname(bd))
-        res = [x.replace(gpbd, "")[1:-3] for x in glob.glob(bd + '/*/__plug_in__.py')]
+        res = [x.replace(gpbd, "")[1:-3] for x in glob.glob(bd + "/*/__plug_in__.py")]
         return res
 
     def register_class(self, cls: Any) -> Any:
@@ -777,14 +812,17 @@ class YAML:
         - if it has methods to_yaml/from_yaml use those to dump/load else dump attributes
           as mapping
         """
-        tag = getattr(cls, 'yaml_tag', '!' + cls.__name__)
+        tag = getattr(cls, "yaml_tag", "!" + cls.__name__)
         try:
             self.representer.add_representer(cls, cls.to_yaml)
         except AttributeError:
 
             def t_y(representer: Any, data: Any) -> Any:
                 return representer.represent_yaml_object(
-                    tag, data, cls, flow_style=representer.default_flow_style,
+                    tag,
+                    data,
+                    cls,
+                    flow_style=representer.default_flow_style,
                 )
 
             self.representer.add_representer(cls, t_y)
@@ -811,13 +849,15 @@ class YAML:
         traceback: Optional[TracebackType],
     ) -> None:
         if typ:
-            nprint('typ', typ)
+            nprint("typ", typ)
         self._context_manager.teardown_output()
         # self._context_manager.teardown_input()
         self._context_manager = None
 
     # ### backwards compatibility
-    def _indent(self, mapping: Any = None, sequence: Any = None, offset: Any = None) -> None:
+    def _indent(
+        self, mapping: Any = None, sequence: Any = None, offset: Any = None
+    ) -> None:
         if mapping is not None:
             self.map_indent = mapping
         if sequence is not None:
@@ -835,16 +875,16 @@ class YAML:
             self._version = val
             return
         elif isinstance(val, str):
-            sval = tuple(int(x) for x in val.split('.'))
+            sval = tuple(int(x) for x in val.split("."))
         elif isinstance(val, (list, tuple)):
             sval = tuple(int(x) for x in val)
         elif isinstance(val, Version):
             sval = (val.major, val.minor)
         else:
-            raise TypeError(f'unknown version type {type(val)}')
-        assert len(sval) == 2, f'version can only have major.minor, got {val}'
-        assert sval[0] == 1, f'version major part can only be 1, got {val}'
-        assert sval[1] in [1, 2], f'version minor part can only be 2 or 1, got {val}'
+            raise TypeError(f"unknown version type {type(val)}")
+        assert len(sval) == 2, f"version can only have major.minor, got {val}"
+        assert sval[0] == 1, f"version major part can only be 1, got {val}"
+        assert sval[1] in [1, 2], f"version minor part can only be 2 or 1, got {val}"
         self._version = sval
 
     @property
@@ -891,10 +931,10 @@ class YAMLContextManager:
         # self._transform = yaml.transform
         # self._fstream = None
 
-        if not hasattr(self._output, 'write') and hasattr(self._output, 'open'):
+        if not hasattr(self._output, "write") and hasattr(self._output, "open"):
             # pathlib.Path() instance, open with the same mode
             self._output_path = self._output
-            self._output = self._output_path.open('w')
+            self._output = self._output_path.open("w")
 
         # if not hasattr(self._stream, 'write') and hasattr(stream, 'open'):
         # if not hasattr(self._input, 'read') and hasattr(self._input, 'open'):
@@ -920,8 +960,8 @@ class YAMLContextManager:
             raise
             # self.dumper.dispose()  # cyaml
         try:
-            delattr(self._yaml, '_serializer')
-            delattr(self._yaml, '_emitter')
+            delattr(self._yaml, "_serializer")
+            delattr(self._yaml, "_emitter")
         except AttributeError:
             raise
         if self._transform:
@@ -981,7 +1021,7 @@ class YAMLContextManager:
 
 
 def yaml_object(yml: Any) -> Any:
-    """ decorator for classes that needs to dump/load objects
+    """decorator for classes that needs to dump/load objects
     The tag for such objects is taken from the class attribute yaml_tag (or the
     class name in lowercase in case unavailable)
     If methods to_yaml and/or from_yaml are available, these are called for dumping resp.
@@ -989,14 +1029,17 @@ def yaml_object(yml: Any) -> Any:
     """
 
     def yo_deco(cls: Any) -> Any:
-        tag = getattr(cls, 'yaml_tag', '!' + cls.__name__)
+        tag = getattr(cls, "yaml_tag", "!" + cls.__name__)
         try:
             yml.representer.add_representer(cls, cls.to_yaml)
         except AttributeError:
 
             def t_y(representer: Any, data: Any) -> Any:
                 return representer.represent_yaml_object(
-                    tag, data, cls, flow_style=representer.default_flow_style,
+                    tag,
+                    data,
+                    cls,
+                    flow_style=representer.default_flow_style,
                 )
 
             yml.representer.add_representer(cls, t_y)
@@ -1014,25 +1057,27 @@ def yaml_object(yml: Any) -> Any:
 
 
 ########################################################################################
-def warn_deprecation(fun: Any, method: Any, arg: str = '') -> None:
+def warn_deprecation(fun: Any, method: Any, arg: str = "") -> None:
     warnings.warn(
-        f'\n{fun} will be removed, use\n\n  yaml=YAML({arg})\n  yaml.{method}(...)\n\ninstead',  # NOQA
+        f"\n{fun} will be removed, use\n\n  yaml=YAML({arg})\n  yaml.{method}(...)\n\ninstead",  # NOQA
         PendingDeprecationWarning,  # this will show when testing with pytest/tox
         stacklevel=3,
     )
 
 
-def error_deprecation(fun: Any, method: Any, arg: str = '', comment: str = 'instead of') -> None:  # NOQA
+def error_deprecation(
+    fun: Any, method: Any, arg: str = "", comment: str = "instead of"
+) -> None:  # NOQA
     import inspect
 
     s = f'\n"{fun}()" has been removed, use\n\n  yaml = YAML({arg})\n  yaml.{method}(...)\n\n{comment}'  # NOQA
     try:
         info = inspect.getframeinfo(inspect.stack()[2][0])
-        context = '' if info.code_context is None else "".join(info.code_context)
+        context = "" if info.code_context is None else "".join(info.code_context)
         s += f' file "{info.filename}", line {info.lineno}\n\n{context}'
     except Exception as e:
         _ = e
-    s += '\n'
+    s += "\n"
     if sys.version_info < (3, 10):
         raise AttributeError(s)
     else:
@@ -1049,14 +1094,14 @@ def scan(stream: StreamTextType, Loader: Any = Loader) -> Any:
     """
     Scan a YAML stream and produce scanning tokens.
     """
-    error_deprecation('scan', 'scan', arg=_error_dep_arg, comment=_error_dep_comment)
+    error_deprecation("scan", "scan", arg=_error_dep_arg, comment=_error_dep_comment)
 
 
 def parse(stream: StreamTextType, Loader: Any = Loader) -> Any:
     """
     Parse a YAML stream and produce parsing events.
     """
-    error_deprecation('parse', 'parse', arg=_error_dep_arg, comment=_error_dep_comment)
+    error_deprecation("parse", "parse", arg=_error_dep_arg, comment=_error_dep_comment)
 
 
 def compose(stream: StreamTextType, Loader: Any = Loader) -> Any:
@@ -1064,7 +1109,9 @@ def compose(stream: StreamTextType, Loader: Any = Loader) -> Any:
     Parse the first YAML document in a stream
     and produce the corresponding representation tree.
     """
-    error_deprecation('compose', 'compose', arg=_error_dep_arg, comment=_error_dep_comment)
+    error_deprecation(
+        "compose", "compose", arg=_error_dep_arg, comment=_error_dep_comment
+    )
 
 
 def compose_all(stream: StreamTextType, Loader: Any = Loader) -> Any:
@@ -1072,28 +1119,38 @@ def compose_all(stream: StreamTextType, Loader: Any = Loader) -> Any:
     Parse all YAML documents in a stream
     and produce corresponding representation trees.
     """
-    error_deprecation('compose', 'compose', arg=_error_dep_arg, comment=_error_dep_comment)
+    error_deprecation(
+        "compose", "compose", arg=_error_dep_arg, comment=_error_dep_comment
+    )
 
 
 def load(
-    stream: Any, Loader: Any = None, version: Any = None, preserve_quotes: Any = None,
+    stream: Any,
+    Loader: Any = None,
+    version: Any = None,
+    preserve_quotes: Any = None,
 ) -> Any:
     """
     Parse the first YAML document in a stream
     and produce the corresponding Python object.
     """
-    error_deprecation('load', 'load', arg=_error_dep_arg, comment=_error_dep_comment)
+    error_deprecation("load", "load", arg=_error_dep_arg, comment=_error_dep_comment)
 
 
 def load_all(
-    stream: Any, Loader: Any = None, version: Any = None, preserve_quotes: Any = None,
+    stream: Any,
+    Loader: Any = None,
+    version: Any = None,
+    preserve_quotes: Any = None,
 ) -> Any:
     # NOQA
     """
     Parse all YAML documents in a stream
     and produce corresponding Python objects.
     """
-    error_deprecation('load_all', 'load_all', arg=_error_dep_arg, comment=_error_dep_comment)
+    error_deprecation(
+        "load_all", "load_all", arg=_error_dep_arg, comment=_error_dep_comment
+    )
 
 
 def safe_load(stream: StreamTextType, version: Optional[VersionType] = None) -> Any:
@@ -1102,7 +1159,7 @@ def safe_load(stream: StreamTextType, version: Optional[VersionType] = None) -> 
     and produce the corresponding Python object.
     Resolve only basic YAML tags.
     """
-    error_deprecation('safe_load', 'load', arg="typ='safe', pure=True")
+    error_deprecation("safe_load", "load", arg="typ='safe', pure=True")
 
 
 def safe_load_all(stream: StreamTextType, version: Optional[VersionType] = None) -> Any:
@@ -1111,7 +1168,7 @@ def safe_load_all(stream: StreamTextType, version: Optional[VersionType] = None)
     and produce corresponding Python objects.
     Resolve only basic YAML tags.
     """
-    error_deprecation('safe_load_all', 'load_all', arg="typ='safe', pure=True")
+    error_deprecation("safe_load_all", "load_all", arg="typ='safe', pure=True")
 
 
 def round_trip_load(
@@ -1124,7 +1181,7 @@ def round_trip_load(
     and produce the corresponding Python object.
     Resolve only basic YAML tags.
     """
-    error_deprecation('round_trip_load_all', 'load')
+    error_deprecation("round_trip_load_all", "load")
 
 
 def round_trip_load_all(
@@ -1137,7 +1194,7 @@ def round_trip_load_all(
     and produce corresponding Python objects.
     Resolve only basic YAML tags.
     """
-    error_deprecation('round_trip_load_all', 'load_all')
+    error_deprecation("round_trip_load_all", "load_all")
 
 
 def emit(
@@ -1155,7 +1212,7 @@ def emit(
     Emit YAML parsing events into a stream.
     If stream is None, return the produced string instead.
     """
-    error_deprecation('emit', 'emit', arg="typ='safe', pure=True")
+    error_deprecation("emit", "emit", arg="typ='safe', pure=True")
 
 
 enc = None
@@ -1181,17 +1238,20 @@ def serialize_all(
     Serialize a sequence of representation trees into a YAML stream.
     If stream is None, return the produced string instead.
     """
-    error_deprecation('serialize_all', 'serialize_all', arg="typ='safe', pure=True")
+    error_deprecation("serialize_all", "serialize_all", arg="typ='safe', pure=True")
 
 
 def serialize(
-    node: Any, stream: Optional[StreamType] = None, Dumper: Any = Dumper, **kwds: Any,
+    node: Any,
+    stream: Optional[StreamType] = None,
+    Dumper: Any = Dumper,
+    **kwds: Any,
 ) -> Any:
     """
     Serialize a representation tree into a YAML stream.
     If stream is None, return the produced string instead.
     """
-    error_deprecation('serialize', 'serialize', arg="typ='safe', pure=True")
+    error_deprecation("serialize", "serialize", arg="typ='safe', pure=True")
 
 
 def dump_all(
@@ -1219,7 +1279,7 @@ def dump_all(
     Serialize a sequence of Python objects into a YAML stream.
     If stream is None, return the produced string instead.
     """
-    error_deprecation('dump_all', 'dump_all', arg="typ='unsafe', pure=True")
+    error_deprecation("dump_all", "dump_all", arg="typ='unsafe', pure=True")
 
 
 def dump(
@@ -1248,7 +1308,7 @@ def dump(
     default_style ∈ None, '', '"', "'", '|', '>'
 
     """
-    error_deprecation('dump', 'dump', arg="typ='unsafe', pure=True")
+    error_deprecation("dump", "dump", arg="typ='unsafe', pure=True")
 
 
 def safe_dump(data: Any, stream: Optional[StreamType] = None, **kwds: Any) -> Any:
@@ -1257,7 +1317,7 @@ def safe_dump(data: Any, stream: Optional[StreamType] = None, **kwds: Any) -> An
     Produce only basic YAML tags.
     If stream is None, return the produced string instead.
     """
-    error_deprecation('safe_dump', 'dump', arg="typ='safe', pure=True")
+    error_deprecation("safe_dump", "dump", arg="typ='safe', pure=True")
 
 
 def round_trip_dump(
@@ -1281,7 +1341,7 @@ def round_trip_dump(
     prefix_colon: Any = None,
 ) -> Any:
     allow_unicode = True if allow_unicode is None else allow_unicode
-    error_deprecation('round_trip_dump', 'dump')
+    error_deprecation("round_trip_dump", "dump")
 
 
 # Loader/Dumper are no longer composites, to get to the associated
@@ -1306,19 +1366,21 @@ def add_implicit_resolver(
         resolver.add_implicit_resolver(tag, regexp, first)
         return
     if Loader:
-        if hasattr(Loader, 'add_implicit_resolver'):
+        if hasattr(Loader, "add_implicit_resolver"):
             Loader.add_implicit_resolver(tag, regexp, first)
         elif issubclass(
-            Loader, (BaseLoader, SafeLoader, ruamel.yaml.loader.Loader, RoundTripLoader),
+            Loader,
+            (BaseLoader, SafeLoader, ruamel.yaml.loader.Loader, RoundTripLoader),
         ):
             Resolver.add_implicit_resolver(tag, regexp, first)
         else:
             raise NotImplementedError
     if Dumper:
-        if hasattr(Dumper, 'add_implicit_resolver'):
+        if hasattr(Dumper, "add_implicit_resolver"):
             Dumper.add_implicit_resolver(tag, regexp, first)
         elif issubclass(
-            Dumper, (BaseDumper, SafeDumper, ruamel.yaml.dumper.Dumper, RoundTripDumper),
+            Dumper,
+            (BaseDumper, SafeDumper, ruamel.yaml.dumper.Dumper, RoundTripDumper),
         ):
             Resolver.add_implicit_resolver(tag, regexp, first)
         else:
@@ -1344,19 +1406,21 @@ def add_path_resolver(
         resolver.add_path_resolver(tag, path, kind)
         return
     if Loader:
-        if hasattr(Loader, 'add_path_resolver'):
+        if hasattr(Loader, "add_path_resolver"):
             Loader.add_path_resolver(tag, path, kind)
         elif issubclass(
-            Loader, (BaseLoader, SafeLoader, ruamel.yaml.loader.Loader, RoundTripLoader),
+            Loader,
+            (BaseLoader, SafeLoader, ruamel.yaml.loader.Loader, RoundTripLoader),
         ):
             Resolver.add_path_resolver(tag, path, kind)
         else:
             raise NotImplementedError
     if Dumper:
-        if hasattr(Dumper, 'add_path_resolver'):
+        if hasattr(Dumper, "add_path_resolver"):
             Dumper.add_path_resolver(tag, path, kind)
         elif issubclass(
-            Dumper, (BaseDumper, SafeDumper, ruamel.yaml.dumper.Dumper, RoundTripDumper),
+            Dumper,
+            (BaseDumper, SafeDumper, ruamel.yaml.dumper.Dumper, RoundTripDumper),
         ):
             Resolver.add_path_resolver(tag, path, kind)
         else:
@@ -1364,7 +1428,10 @@ def add_path_resolver(
 
 
 def add_constructor(
-    tag: Any, object_constructor: Any, Loader: Any = None, constructor: Any = Constructor,
+    tag: Any,
+    object_constructor: Any,
+    Loader: Any = None,
+    constructor: Any = Constructor,
 ) -> None:
     """
     Add an object constructor for the given tag.
@@ -1374,7 +1441,7 @@ def add_constructor(
     if Loader is None:
         constructor.add_constructor(tag, object_constructor)
     else:
-        if hasattr(Loader, 'add_constructor'):
+        if hasattr(Loader, "add_constructor"):
             Loader.add_constructor(tag, object_constructor)
             return
         if issubclass(Loader, BaseLoader):
@@ -1390,7 +1457,10 @@ def add_constructor(
 
 
 def add_multi_constructor(
-    tag_prefix: Any, multi_constructor: Any, Loader: Any = None, constructor: Any = Constructor,  # NOQA
+    tag_prefix: Any,
+    multi_constructor: Any,
+    Loader: Any = None,
+    constructor: Any = Constructor,  # NOQA
 ) -> None:
     """
     Add a multi-constructor for the given tag prefix.
@@ -1401,7 +1471,7 @@ def add_multi_constructor(
     if Loader is None:
         constructor.add_multi_constructor(tag_prefix, multi_constructor)
     else:
-        if False and hasattr(Loader, 'add_multi_constructor'):
+        if False and hasattr(Loader, "add_multi_constructor"):
             Loader.add_multi_constructor(tag_prefix, constructor)
             return
         if issubclass(Loader, BaseLoader):
@@ -1417,7 +1487,10 @@ def add_multi_constructor(
 
 
 def add_representer(
-    data_type: Any, object_representer: Any, Dumper: Any = None, representer: Any = Representer,  # NOQA
+    data_type: Any,
+    object_representer: Any,
+    Dumper: Any = None,
+    representer: Any = Representer,  # NOQA
 ) -> None:
     """
     Add a representer for the given type.
@@ -1428,7 +1501,7 @@ def add_representer(
     if Dumper is None:
         representer.add_representer(data_type, object_representer)
     else:
-        if hasattr(Dumper, 'add_representer'):
+        if hasattr(Dumper, "add_representer"):
             Dumper.add_representer(data_type, object_representer)
             return
         if issubclass(Dumper, BaseDumper):
@@ -1445,7 +1518,10 @@ def add_representer(
 
 # this code currently not tested
 def add_multi_representer(
-    data_type: Any, multi_representer: Any, Dumper: Any = None, representer: Any = Representer,
+    data_type: Any,
+    multi_representer: Any,
+    Dumper: Any = None,
+    representer: Any = Representer,
 ) -> None:
     """
     Add a representer for the given type.
@@ -1456,7 +1532,7 @@ def add_multi_representer(
     if Dumper is None:
         representer.add_multi_representer(data_type, multi_representer)
     else:
-        if hasattr(Dumper, 'add_multi_representer'):
+        if hasattr(Dumper, "add_multi_representer"):
             Dumper.add_multi_representer(data_type, multi_representer)
             return
         if issubclass(Dumper, BaseDumper):
@@ -1478,7 +1554,7 @@ class YAMLObjectMetaclass(type):
 
     def __init__(cls, name: Any, bases: Any, kwds: Any) -> None:
         super().__init__(name, bases, kwds)
-        if 'yaml_tag' in kwds and kwds['yaml_tag'] is not None:
+        if "yaml_tag" in kwds and kwds["yaml_tag"] is not None:
             cls.yaml_constructor.add_constructor(cls.yaml_tag, cls.from_yaml)  # type: ignore
             cls.yaml_representer.add_representer(cls, cls.to_yaml)  # type: ignore
 
@@ -1510,5 +1586,8 @@ class YAMLObject(with_metaclass(YAMLObjectMetaclass)):  # type: ignore
         Convert a Python object to a representation node.
         """
         return representer.represent_yaml_object(
-            cls.yaml_tag, data, cls, flow_style=cls.yaml_flow_style,
+            cls.yaml_tag,
+            data,
+            cls,
+            flow_style=cls.yaml_flow_style,
         )

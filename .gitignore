@@ -18,3 +18,12 @@ _doc/*.md
 
 ziglib
 
+# python build artefacts
+__pycache__
+*.pyc
+build
+*.whl
+*.egg-info
+
+# pytest
+.pytest_cache
