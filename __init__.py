@@ -4,14 +4,14 @@ if False:  # MYPY
     from typing import Dict, Any  # NOQA
 
 _package_data = dict(
-    full_package_name="pureyaml",
+    full_package_name="pureaml",
     version_info=(0, 18, 6),
     __version__="0.18.6",
     version_timestamp="2024-02-07 07:43:33",
     author="Anthon van der Neut",
     author_email="a.van.der.neut@ruamel.eu",
-    description="pureyaml is a fork of ruamel.yaml is a YAML parser/emitter that supports roundtrip preservation of comments, seq/map flow style, and map key order",  # NOQA
-    homepage="https://github.com/kumekay/pureyaml",
+    description="pureaml is a fork of ruamel.yaml is a YAML parser/emitter that supports roundtrip preservation of comments, seq/map flow style, and map key order",  # NOQA
+    homepage="https://github.com/kumekay/pureaml",
     entry_points=None,
     since=2014,
     extras_require={
