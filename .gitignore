@@ -5,10 +5,9 @@
 # [ui]
 # ignore = ~/.hgext/hgignore
 
-syntax: glob
-
 # _yaml.so
 venv
+.venv
 TODO.rst
 try_*
 _doc/*.pdf
@@ -18,3 +17,4 @@ _doc/*.md
 *.py_alt
 
 ziglib
+
