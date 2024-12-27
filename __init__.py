@@ -11,6 +11,7 @@ _package_data = dict(
     author="Anthon van der Neut",
     author_email="a.van.der.neut@ruamel.eu",
     description="pureyaml is a fork of ruamel.yaml is a YAML parser/emitter that supports roundtrip preservation of comments, seq/map flow style, and map key order",  # NOQA
+    homepage="https://github.com/kumekay/pureyaml",
     entry_points=None,
     since=2014,
     extras_require={
